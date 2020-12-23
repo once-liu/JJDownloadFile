@@ -56,7 +56,7 @@
                                 </constraints>
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eVM-cd-AUI">
-                                <rect key="frame" x="167" y="476" width="80" height="40"/>
+                                <rect key="frame" x="167" y="472" width="80" height="40"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="40" id="4qN-HI-XhP"/>
                                     <constraint firstAttribute="width" constant="80" id="qaG-Za-8Bs"/>
@@ -67,20 +67,20 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="s3k-Gi-qH7">
-                                <rect key="frame" x="183" y="536" width="48" height="30"/>
+                                <rect key="frame" x="183" y="532" width="48" height="30"/>
                                 <state key="normal" title="Cancel"/>
                                 <connections>
                                     <action selector="cancelAction:" destination="CFO-yu-WDj" eventType="touchUpInside" id="LuF-zL-n0Q"/>
                                 </connections>
                             </button>
                             <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="Jdk-df-60v">
-                                <rect key="frame" x="90" y="428" width="234" height="8"/>
+                                <rect key="frame" x="90" y="428" width="234" height="4"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="8" id="9Hq-7Q-DwK"/>
+                                    <constraint firstAttribute="height" constant="4" id="9Hq-7Q-DwK"/>
                                 </constraints>
                             </progressView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NwR-6u-7yp">
-                                <rect key="frame" x="179.5" y="586" width="55" height="30"/>
+                                <rect key="frame" x="179.5" y="582" width="55" height="30"/>
                                 <state key="normal" title="Resume"/>
                                 <connections>
                                     <action selector="resumeAction:" destination="CFO-yu-WDj" eventType="touchUpInside" id="rsk-dl-6MV"/>
