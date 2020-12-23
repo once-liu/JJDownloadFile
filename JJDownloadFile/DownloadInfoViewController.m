@@ -12,7 +12,8 @@
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 @property (weak, nonatomic) IBOutlet UIProgressView *progress;
 
-@property (nonatomic, assign) NSInteger totalLength, currentLenght;
+@property (nonatomic, strong) NSURLConnection *connection;
+@property (nonatomic, assign) NSInteger totalLength, currentLength;
 @property (nonatomic, strong) NSFileHandle *fileHandle;
 
 @end
@@ -24,6 +25,9 @@
     // Do any additional setup after loading the view.
     
     self.progress.progress = 0.;
+    
+    self.totalLength = 0;
+    self.currentLength = 0;
 }
 
 - (IBAction)downloadAction:(id)sender {
@@ -31,6 +35,7 @@
 }
 
 - (IBAction)cancelAction:(id)sender {
+    [self suspendDownloadBigFileWtihURLConnection];
 }
 
 - (IBAction)resumeAction:(id)sender {
@@ -83,14 +88,48 @@
 //MARK: - 大文件
 
 - (void)downloadBigFileWtihURLConnection {
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSString *documentFilePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject];
+    NSString *filePath = [documentFilePath stringByAppendingPathComponent:@"boxue.mp4"];
+    
+    NSLog(@" filePath: %@", filePath);
+    NSInteger currentLength = [self fileLengthForPath:filePath];
+    if (currentLength) {
+        self.currentLength = currentLength;
+        NSLog(@" currentLength: %ld", currentLength);
+    }
+    
+    
     NSURL *URL = [NSURL URLWithString:@"https://free-video.boxueio.com/ConstantAndVariable_Swift3-9781ed6f7bec16a5b48ea466496cfacd.mp4"];
     
-    NSURLRequest *request = [NSURLRequest requestWithURL:URL];
-    [NSURLConnection connectionWithRequest:request delegate:self];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:URL];
+    if (self.currentLength) {
+        NSString *range = [NSString stringWithFormat:@"bytes=%ld-", self.currentLength];
+        [request setValue:range forHTTPHeaderField:@"Range"];
+    }
+    self.connection = [NSURLConnection connectionWithRequest:request delegate:self];
     
-    self.totalLength = 0;
-    self.currentLenght = 0;
 }
+
+- (void)suspendDownloadBigFileWtihURLConnection {
+    [self.connection cancel];
+    self.connection = nil;
+}
+
+
+- (NSInteger)fileLengthForPath:(NSString *)filePath {
+    NSInteger fileLength = 0;
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    if ([fileManager fileExistsAtPath:filePath]) {
+        NSError *error = nil;
+        NSDictionary *fileDic = [fileManager attributesOfItemAtPath:filePath error:&error];
+        if (!error && fileDic) {
+            fileLength = [fileDic fileSize];
+        }
+    }
+    return fileLength;
+}
+
 
 //MARK: - NSURLConnectionDataDelegate
 
@@ -101,7 +140,7 @@
     
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSString *documentFilePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject];
-    NSString *filePath = [documentFilePath stringByAppendingPathComponent:response.suggestedFilename];
+    NSString *filePath = [documentFilePath stringByAppendingPathComponent:@"boxue.mp4"];
     
     NSLog(@" filePath: %@", filePath);
     
@@ -120,10 +159,10 @@
     // 向沙盒写入数据
     [self.fileHandle writeData:data];
     
-    self.currentLenght += data.length;
+    self.currentLength += data.length;
     
-    self.progress.progress = self.currentLenght * 1.0 / self.totalLength;
-    NSLog(@" progress: %f", self.progress.progress);
+    self.progress.progress = self.currentLength * 1.0 / self.totalLength;
+    NSLog(@" currentProgress: %ld, progress: %f", self.currentLength, self.progress.progress);
 }
 
 - (void)connection:(NSURLConnection *)connection
@@ -139,10 +178,14 @@ totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite {
     [self.fileHandle closeFile];
     self.fileHandle = nil;
     
-    self.currentLenght = 0;
+    self.currentLength = 0;
     self.totalLength = 0;
 }
 
+
+- (void)downloadBigFileWtihURLSession {
+    
+}
 
 
 @end
