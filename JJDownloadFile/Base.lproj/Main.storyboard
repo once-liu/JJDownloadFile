@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="G73-km-UWc">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17505"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qEp-YJ-VNz">
+                                <rect key="frame" x="147" y="388" width="120" height="120"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="120" id="4R8-48-Lqv"/>
+                                    <constraint firstAttribute="width" constant="120" id="gbS-X1-4y3"/>
+                                </constraints>
+                                <state key="normal" title="Push"/>
+                                <connections>
+                                    <segue destination="CFO-yu-WDj" kind="show" id="b6D-Vj-hjD"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="qEp-YJ-VNz" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="iWT-Qj-Sba"/>
+                            <constraint firstItem="qEp-YJ-VNz" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="lfQ-FI-LZM"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="uxZ-Gs-iT5"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="776.81159420289862" y="116.51785714285714"/>
+        </scene>
+        <!--Title-->
+        <scene sceneID="H2X-TN-dIj">
+            <objects>
+                <viewController id="CFO-yu-WDj" customClass="DownloadInfoViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="JNf-t9-dYA">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="516-AD-BBN">
+                                <rect key="frame" x="20" y="108" width="374" height="300"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="300" id="YKg-IH-Sge"/>
+                                </constraints>
+                            </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eVM-cd-AUI">
+                                <rect key="frame" x="167" y="476" width="80" height="40"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="40" id="4qN-HI-XhP"/>
+                                    <constraint firstAttribute="width" constant="80" id="qaG-Za-8Bs"/>
+                                </constraints>
+                                <state key="normal" title="Download"/>
+                                <connections>
+                                    <action selector="downloadAction:" destination="CFO-yu-WDj" eventType="touchUpInside" id="EPc-fq-Jka"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="s3k-Gi-qH7">
+                                <rect key="frame" x="183" y="536" width="48" height="30"/>
+                                <state key="normal" title="Cancel"/>
+                                <connections>
+                                    <action selector="cancelAction:" destination="CFO-yu-WDj" eventType="touchUpInside" id="LuF-zL-n0Q"/>
+                                </connections>
+                            </button>
+                            <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="Jdk-df-60v">
+                                <rect key="frame" x="90" y="428" width="234" height="8"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="8" id="9Hq-7Q-DwK"/>
+                                </constraints>
+                            </progressView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NwR-6u-7yp">
+                                <rect key="frame" x="179.5" y="586" width="55" height="30"/>
+                                <state key="normal" title="Resume"/>
+                                <connections>
+                                    <action selector="resumeAction:" destination="CFO-yu-WDj" eventType="touchUpInside" id="rsk-dl-6MV"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="uTQ-o3-Qgb"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="516-AD-BBN" firstAttribute="leading" secondItem="uTQ-o3-Qgb" secondAttribute="leading" constant="20" id="4f2-kj-4qB"/>
+                            <constraint firstItem="uTQ-o3-Qgb" firstAttribute="trailing" secondItem="Jdk-df-60v" secondAttribute="trailing" constant="90" id="9IW-xv-gFh"/>
+                            <constraint firstItem="516-AD-BBN" firstAttribute="top" secondItem="uTQ-o3-Qgb" secondAttribute="top" constant="20" id="F5S-ig-Zug"/>
+                            <constraint firstItem="Jdk-df-60v" firstAttribute="top" secondItem="516-AD-BBN" secondAttribute="bottom" constant="20" id="HEl-d8-5eB"/>
+                            <constraint firstItem="eVM-cd-AUI" firstAttribute="top" secondItem="Jdk-df-60v" secondAttribute="bottom" constant="40" id="IOf-tu-lW0"/>
+                            <constraint firstItem="s3k-Gi-qH7" firstAttribute="centerX" secondItem="eVM-cd-AUI" secondAttribute="centerX" id="LRB-D5-WxU"/>
+                            <constraint firstItem="NwR-6u-7yp" firstAttribute="width" secondItem="eVM-cd-AUI" secondAttribute="width" multiplier="0.6875" id="LTj-0J-j9r"/>
+                            <constraint firstItem="uTQ-o3-Qgb" firstAttribute="trailing" secondItem="516-AD-BBN" secondAttribute="trailing" constant="20" id="M8D-pY-qex"/>
+                            <constraint firstItem="NwR-6u-7yp" firstAttribute="centerX" secondItem="s3k-Gi-qH7" secondAttribute="centerX" id="WDF-7L-jIp"/>
+                            <constraint firstItem="NwR-6u-7yp" firstAttribute="height" secondItem="eVM-cd-AUI" secondAttribute="height" multiplier="0.75" id="efq-aq-CSt"/>
+                            <constraint firstItem="eVM-cd-AUI" firstAttribute="centerX" secondItem="JNf-t9-dYA" secondAttribute="centerX" id="faR-g1-a2o"/>
+                            <constraint firstItem="s3k-Gi-qH7" firstAttribute="height" secondItem="eVM-cd-AUI" secondAttribute="height" multiplier="0.75" id="jus-IY-utn"/>
+                            <constraint firstItem="s3k-Gi-qH7" firstAttribute="top" secondItem="eVM-cd-AUI" secondAttribute="bottom" constant="20" id="kvs-vO-wZN"/>
+                            <constraint firstItem="s3k-Gi-qH7" firstAttribute="width" secondItem="eVM-cd-AUI" secondAttribute="width" multiplier="0.6" id="r6u-D8-Z61"/>
+                            <constraint firstItem="NwR-6u-7yp" firstAttribute="top" secondItem="s3k-Gi-qH7" secondAttribute="bottom" constant="20" id="wqJ-WP-W61"/>
+                            <constraint firstItem="Jdk-df-60v" firstAttribute="leading" secondItem="uTQ-o3-Qgb" secondAttribute="leading" constant="90" id="zpE-Xv-C9C"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Title" id="GO3-2F-7VN"/>
+                    <connections>
+                        <outlet property="imageView" destination="516-AD-BBN" id="bJ5-4E-r6i"/>
+                        <outlet property="progress" destination="Jdk-df-60v" id="8Sw-63-rwD"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="l0v-9u-84p" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1586.9565217391305" y="116.51785714285714"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="QTa-AP-nxl">
+            <objects>
+                <navigationController id="G73-km-UWc" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="thy-h5-gtP">
+                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="lxf-nV-EWo"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="lLr-GG-gH9" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="14" y="117"/>
+        </scene>
+    </scenes>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
