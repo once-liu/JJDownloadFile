@@ -31,11 +31,11 @@
 }
 
 - (IBAction)downloadAction:(id)sender {
-    [self downloadBigFileWtihURLConnection];
+    [self downloadBigFileWtihURLSessionBlock];
 }
 
 - (IBAction)cancelAction:(id)sender {
-    [self suspendDownloadBigFileWtihURLConnection];
+    
 }
 
 - (IBAction)resumeAction:(id)sender {
@@ -183,8 +183,22 @@ totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite {
 }
 
 
-- (void)downloadBigFileWtihURLSession {
+- (void)downloadBigFileWtihURLSessionBlock {
+    // 这种下载方式不能获取 progress
+    NSURL *URL = [NSURL URLWithString:@"https://free-video.boxueio.com/ConstantAndVariable_Swift3-9781ed6f7bec16a5b48ea466496cfacd.mp4"];
     
+    NSURLSession *session = [NSURLSession sharedSession];
+    NSURLRequest *request = [NSURLRequest requestWithURL:URL];
+    NSURLSessionDownloadTask *downloadTask = [session downloadTaskWithRequest:request completionHandler:^(NSURL * _Nullable location, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+        NSLog(@" location: %@", location);
+        
+        NSFileManager *fileManager = [NSFileManager defaultManager];
+        NSString *documentFilePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject];
+        NSString *filePath = [documentFilePath stringByAppendingPathComponent:@"boxue.mp4"];
+        
+        [fileManager moveItemAtPath:location.path toPath:filePath error:nil];
+    }];
+    [downloadTask resume];
 }
 
 
