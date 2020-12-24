@@ -22,6 +22,8 @@
 @property (nonatomic, strong) NSURLSessionDataTask *downloadDataTask;
 @property (nonatomic, strong) NSData *resumeData;
 
+@property (nonatomic, strong) NSURLSessionDataTask *downloadTaskAFN;
+
 @end
 
 @implementation DownloadInfoViewController
@@ -37,11 +39,11 @@
 }
 
 - (IBAction)downloadAction:(id)sender {
-    [self downloadBigFileWithAFN];
+    [self downloadBigFileWithAFNOffline];
 }
 
 - (IBAction)cancelAction:(id)sender {
-    
+    [self cancelDownloadBigFileWithAFNOffline];
 }
 
 - (IBAction)resumeAction:(id)sender {
@@ -365,6 +367,89 @@ didCompleteWithError:(nullable NSError *)error {
         NSLog(@" filePath: %@", filePath.path);
     }];
     [downloadTask resume];
+}
+
+- (void)downloadBigFileWithAFNOffline {
+    NSString *documentFilePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject];
+    NSString *filePath = [documentFilePath stringByAppendingPathComponent:@"boxue.mp4"];
+    
+    NSInteger currentLength = [self fileLengthForPath:filePath];
+    if (currentLength) {
+        self.currentLength = currentLength;
+    }
+    
+    [self.downloadTaskAFN resume];
+    
+}
+
+- (void)cancelDownloadBigFileWithAFNOffline {
+    [self.downloadTaskAFN suspend];
+    self.downloadTaskAFN = nil;
+}
+
+- (NSURLSessionDataTask *)downloadTaskAFN {
+    if (!_downloadTaskAFN) {
+        NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+        AFURLSessionManager *manager = [[AFURLSessionManager alloc] initWithSessionConfiguration:configuration];
+        
+        NSURL *URL = [NSURL URLWithString:@"https://free-video.boxueio.com/ConstantAndVariable_Swift3-9781ed6f7bec16a5b48ea466496cfacd.mp4"];
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:URL];
+        if (self.currentLength) {
+            NSString *range = [NSString stringWithFormat:@"bytes=%ld-", self.currentLength];
+            [request setValue:range forHTTPHeaderField:@"Range"];
+        }
+        
+        
+        __weak typeof(self) weakSelf = self;
+        _downloadTaskAFN = [manager dataTaskWithRequest:request uploadProgress:^(NSProgress * _Nonnull uploadProgress) {
+           
+        } downloadProgress:^(NSProgress * _Nonnull downloadProgress) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                weakSelf.progress.progress = 1.0 * downloadProgress.completedUnitCount / downloadProgress.totalUnitCount;
+                NSLog(@" progress: %lf", 1.0 * downloadProgress.completedUnitCount / downloadProgress.totalUnitCount);
+            });
+            
+        } completionHandler:^(NSURLResponse * _Nonnull response, id  _Nullable responseObject, NSError * _Nullable error) {
+            [weakSelf.fileHandle closeFile];
+            weakSelf.fileHandle = nil;
+            
+            weakSelf.currentLength = 0;
+            weakSelf.totalLength = 0;
+        }];
+        
+        [manager setDataTaskDidReceiveResponseBlock:^NSURLSessionResponseDisposition(NSURLSession * _Nonnull session, NSURLSessionDataTask * _Nonnull dataTask, NSURLResponse * _Nonnull response) {
+            self.totalLength = response.expectedContentLength + self.currentLength;
+            
+            NSFileManager *fileManager = [NSFileManager defaultManager];
+            NSString *documentFilePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject];
+            NSString *filePath = [documentFilePath stringByAppendingPathComponent:@"boxue.mp4"];
+            
+            NSLog(@" filePath: %@", filePath);
+            
+            if (![fileManager fileExistsAtPath:filePath]) {
+                [fileManager createFileAtPath:filePath contents:nil attributes:nil];
+            }
+            
+            weakSelf.fileHandle = [NSFileHandle fileHandleForWritingAtPath:filePath];
+            
+            return NSURLSessionResponseAllow;
+        }];
+        
+        [manager setDataTaskDidReceiveDataBlock:^(NSURLSession * _Nonnull session, NSURLSessionDataTask * _Nonnull dataTask, NSData * _Nonnull data) {
+            // 指定数据的写入位置 -- 文件内容的最后面
+            [weakSelf.fileHandle seekToEndOfFile];
+            // 向沙盒写入数据
+            [weakSelf.fileHandle writeData:data];
+            
+            weakSelf.currentLength += data.length;
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                weakSelf.progress.progress = weakSelf.currentLength * 1.0 / weakSelf.totalLength;
+            });
+        }];
+         
+    }
+    return _downloadTaskAFN;
 }
 
 
