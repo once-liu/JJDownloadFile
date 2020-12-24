@@ -7,7 +7,7 @@
 
 #import "DownloadInfoViewController.h"
 
-@interface DownloadInfoViewController () <NSURLConnectionDataDelegate>
+@interface DownloadInfoViewController () <NSURLConnectionDataDelegate, NSURLSessionDelegate, NSURLSessionDownloadDelegate>
 
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 @property (weak, nonatomic) IBOutlet UIProgressView *progress;
@@ -15,6 +15,9 @@
 @property (nonatomic, strong) NSURLConnection *connection;
 @property (nonatomic, assign) NSInteger totalLength, currentLength;
 @property (nonatomic, strong) NSFileHandle *fileHandle;
+
+@property (nonatomic, strong) NSURLSessionDownloadTask *downloadTask;
+@property (nonatomic, strong) NSData *resumeData;
 
 @end
 
@@ -31,7 +34,7 @@
 }
 
 - (IBAction)downloadAction:(id)sender {
-    [self downloadBigFileWtihURLSessionBlock];
+    [self downloadBigFileWtihURLSessionDelegate];
 }
 
 - (IBAction)cancelAction:(id)sender {
@@ -200,6 +203,41 @@ totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite {
     }];
     [downloadTask resume];
 }
+
+- (void)downloadBigFileWtihURLSessionDelegate {
+    NSURL *URL = [NSURL URLWithString:@"https://free-video.boxueio.com/ConstantAndVariable_Swift3-9781ed6f7bec16a5b48ea466496cfacd.mp4"];
+    
+    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+    NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:[NSOperationQueue mainQueue]];
+    NSURLSessionDownloadTask *downloadTask = [session downloadTaskWithURL:URL];
+    [downloadTask resume];
+    self.downloadTask = downloadTask;
+}
+
+
+
+//MARK: - NSURLSessionDownloadDelegate
+
+- (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask
+didFinishDownloadingToURL:(NSURL *)location {
+    NSLog(@" location: %@", location);
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSString *documentFilePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject];
+    NSString *filePath = [documentFilePath stringByAppendingPathComponent:@"boxue.mp4"];
+    NSLog(@" filePath: %@", filePath);
+    
+    [fileManager moveItemAtPath:location.path toPath:filePath error:nil];
+}
+
+- (void)URLSession:(NSURLSession *)session
+      downloadTask:(NSURLSessionDownloadTask *)downloadTask
+      didWriteData:(int64_t)bytesWritten
+ totalBytesWritten:(int64_t)totalBytesWritten
+totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
+    
+    self.progress.progress = 1.0 * totalBytesWritten / totalBytesExpectedToWrite;
+}
+
 
 
 @end
