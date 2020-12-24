@@ -16,6 +16,7 @@
 @property (nonatomic, assign) NSInteger totalLength, currentLength;
 @property (nonatomic, strong) NSFileHandle *fileHandle;
 
+@property (nonatomic, strong) NSURLSession *session;
 @property (nonatomic, strong) NSURLSessionDownloadTask *downloadTask;
 @property (nonatomic, strong) NSData *resumeData;
 
@@ -38,7 +39,7 @@
 }
 
 - (IBAction)cancelAction:(id)sender {
-    
+    [self cancelDownloadBigFileWtihURLSessionDelegate];
 }
 
 - (IBAction)resumeAction:(id)sender {
@@ -205,16 +206,34 @@ totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite {
 }
 
 - (void)downloadBigFileWtihURLSessionDelegate {
-    NSURL *URL = [NSURL URLWithString:@"https://free-video.boxueio.com/ConstantAndVariable_Swift3-9781ed6f7bec16a5b48ea466496cfacd.mp4"];
+    if (!self.session) {
+        NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+        NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:[NSOperationQueue mainQueue]];
+        self.session = session;
+    }
     
-    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
-    NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:[NSOperationQueue mainQueue]];
-    NSURLSessionDownloadTask *downloadTask = [session downloadTaskWithURL:URL];
-    [downloadTask resume];
-    self.downloadTask = downloadTask;
+    if (self.resumeData) {
+        self.downloadTask = [self.session downloadTaskWithResumeData:self.resumeData];
+        [self.downloadTask resume];
+        self.resumeData = nil;
+    } else {
+        NSURL *URL = [NSURL URLWithString:@"https://free-video.boxueio.com/ConstantAndVariable_Swift3-9781ed6f7bec16a5b48ea466496cfacd.mp4"];
+        
+        NSURLSessionDownloadTask *downloadTask = [self.session downloadTaskWithURL:URL];
+        [downloadTask resume];
+        self.downloadTask = downloadTask;
+    }
+    
 }
 
-
+- (void)cancelDownloadBigFileWtihURLSessionDelegate {
+    __weak typeof(self) weakSelf = self;
+    [self.downloadTask cancelByProducingResumeData:^(NSData * _Nullable resumeData) {
+        weakSelf.resumeData = resumeData;
+        weakSelf.downloadTask = nil;
+    }];
+    
+}
 
 //MARK: - NSURLSessionDownloadDelegate
 
