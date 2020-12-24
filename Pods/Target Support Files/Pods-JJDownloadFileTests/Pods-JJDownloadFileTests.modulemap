@@ -1,0 +1,6 @@
+framework module Pods_JJDownloadFileTests {
+  umbrella header "Pods-JJDownloadFileTests-umbrella.h"
+
+  export *
+  module * { export * }
+}

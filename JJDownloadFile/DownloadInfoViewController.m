@@ -6,6 +6,7 @@
 //
 
 #import "DownloadInfoViewController.h"
+#import <AFNetworking/AFNetworking.h>
 
 @interface DownloadInfoViewController () <NSURLConnectionDataDelegate, NSURLSessionDelegate, NSURLSessionDownloadDelegate, NSURLSessionDataDelegate>
 
@@ -36,11 +37,11 @@
 }
 
 - (IBAction)downloadAction:(id)sender {
-    [self downloadBigFileWtihURLSessionDelegateOffline];
+    [self downloadBigFileWithAFN];
 }
 
 - (IBAction)cancelAction:(id)sender {
-    [self cancelDownloadBigFileWtihURLSessionDelegateOffline];
+    
 }
 
 - (IBAction)resumeAction:(id)sender {
@@ -339,5 +340,32 @@ didCompleteWithError:(nullable NSError *)error {
     self.currentLength = 0;
     self.totalLength = 0;
 }
+
+
+//MARK: - AFN
+
+- (void)downloadBigFileWithAFN {
+    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+    AFURLSessionManager *manager = [[AFURLSessionManager alloc] initWithSessionConfiguration:configuration];
+    
+    NSURL *URL = [NSURL URLWithString:@"https://free-video.boxueio.com/ConstantAndVariable_Swift3-9781ed6f7bec16a5b48ea466496cfacd.mp4"];
+    NSURLRequest *request = [NSURLRequest requestWithURL:URL];
+    __weak typeof(self) weakSelf = self;
+    NSURLSessionDownloadTask *downloadTask = [manager downloadTaskWithRequest:request progress:^(NSProgress * _Nonnull downloadProgress) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            weakSelf.progress.progress = 1.0 * downloadProgress.completedUnitCount / downloadProgress.totalUnitCount;
+            NSLog(@" progress: %lf", 1.0 * downloadProgress.completedUnitCount / downloadProgress.totalUnitCount);
+        });
+        
+    } destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
+        NSURL *path = [[NSFileManager defaultManager] URLForDirectory:NSCachesDirectory inDomain:(NSUserDomainMask) appropriateForURL:nil create:NO error:nil];
+        return [path URLByAppendingPathComponent:@"boxue.mp4"];
+        
+    } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
+        NSLog(@" filePath: %@", filePath.path);
+    }];
+    [downloadTask resume];
+}
+
 
 @end
