@@ -7,7 +7,7 @@
 
 #import "DownloadInfoViewController.h"
 
-@interface DownloadInfoViewController () <NSURLConnectionDataDelegate, NSURLSessionDelegate, NSURLSessionDownloadDelegate>
+@interface DownloadInfoViewController () <NSURLConnectionDataDelegate, NSURLSessionDelegate, NSURLSessionDownloadDelegate, NSURLSessionDataDelegate>
 
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 @property (weak, nonatomic) IBOutlet UIProgressView *progress;
@@ -18,6 +18,7 @@
 
 @property (nonatomic, strong) NSURLSession *session;
 @property (nonatomic, strong) NSURLSessionDownloadTask *downloadTask;
+@property (nonatomic, strong) NSURLSessionDataTask *downloadDataTask;
 @property (nonatomic, strong) NSData *resumeData;
 
 @end
@@ -35,11 +36,11 @@
 }
 
 - (IBAction)downloadAction:(id)sender {
-    [self downloadBigFileWtihURLSessionDelegate];
+    [self downloadBigFileWtihURLSessionDelegateOffline];
 }
 
 - (IBAction)cancelAction:(id)sender {
-    [self cancelDownloadBigFileWtihURLSessionDelegate];
+    [self cancelDownloadBigFileWtihURLSessionDelegateOffline];
 }
 
 - (IBAction)resumeAction:(id)sender {
@@ -235,6 +236,37 @@ totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite {
     
 }
 
+- (void)downloadBigFileWtihURLSessionDelegateOffline {
+    if (!self.session) {
+        NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+        NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:[NSOperationQueue mainQueue]];
+        self.session = session;
+    }
+    
+    NSString *documentFilePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject];
+    NSString *filePath = [documentFilePath stringByAppendingPathComponent:@"boxue.mp4"];
+    
+    NSURL *URL = [NSURL URLWithString:@"https://free-video.boxueio.com/ConstantAndVariable_Swift3-9781ed6f7bec16a5b48ea466496cfacd.mp4"];
+    
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:URL];
+    NSInteger currentLength = [self fileLengthForPath:filePath];
+    if (currentLength) {
+        self.currentLength = currentLength;
+        NSString *range = [NSString stringWithFormat:@"bytes=%ld-", currentLength];
+        [request setValue:range forHTTPHeaderField:@"Range"];
+    }
+    
+    NSURLSessionDataTask *dataTask = [self.session dataTaskWithRequest:request];
+    [dataTask resume];
+    self.downloadDataTask = dataTask;
+}
+
+- (void)cancelDownloadBigFileWtihURLSessionDelegateOffline {
+    [self.downloadDataTask suspend];
+    self.downloadDataTask = nil;
+}
+
+
 //MARK: - NSURLSessionDownloadDelegate
 
 - (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask
@@ -257,6 +289,55 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
     self.progress.progress = 1.0 * totalBytesWritten / totalBytesExpectedToWrite;
 }
 
+//MARK: - NSURLSessionDataDelegate
 
+- (void)URLSession:(NSURLSession *)session
+          dataTask:(NSURLSessionDataTask *)dataTask
+didReceiveResponse:(NSURLResponse *)response
+ completionHandler:(void (^)(NSURLSessionResponseDisposition disposition))completionHandler {
+    self.totalLength = response.expectedContentLength + self.currentLength;
+    
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSString *documentFilePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject];
+    NSString *filePath = [documentFilePath stringByAppendingPathComponent:@"boxue.mp4"];
+    
+    NSLog(@" filePath: %@", filePath);
+    
+    if (![fileManager fileExistsAtPath:filePath]) {
+        [fileManager createFileAtPath:filePath contents:nil attributes:nil];
+    }
+    
+    self.fileHandle = [NSFileHandle fileHandleForWritingAtPath:filePath];
+    
+    completionHandler(NSURLSessionResponseAllow);
+}
+
+- (void)URLSession:(NSURLSession *)session
+          dataTask:(NSURLSessionDataTask *)dataTask
+    didReceiveData:(NSData *)data {
+    
+    // 指定数据的写入位置 -- 文件内容的最后面
+    [self.fileHandle seekToEndOfFile];
+    // 向沙盒写入数据
+    [self.fileHandle writeData:data];
+    
+    self.currentLength += data.length;
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.progress.progress = self.currentLength * 1.0 / self.totalLength;
+    });
+    
+    NSLog(@" currentProgress: %ld, progress: %f", self.currentLength, self.progress.progress);
+}
+
+- (void)URLSession:(NSURLSession *)session
+              task:(NSURLSessionTask *)task
+didCompleteWithError:(nullable NSError *)error {
+    [self.fileHandle closeFile];
+    self.fileHandle = nil;
+    
+    self.currentLength = 0;
+    self.totalLength = 0;
+}
 
 @end
